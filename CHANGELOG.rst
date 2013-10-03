@@ -9,6 +9,14 @@ Studio: Change course overview page, checklists, and course staff management
 page URLs to a RESTful interface. Also removed "\listing", which duplicated
 "\index".
 
+Studio: support shuffling of multiple choice questions, so authors can
+write options without worrying about their order.
+In XML: <choicegroup type="MultipleChoice" shuffle="true"> enables shuffling
+and <choice fixed="true"> does not shuffle a choice, e.g.
+an "All of the above" choice that should go last.
+In the markdown, exclamation (!) in any of the parenthesis enables shuffling,
+and (@) sets a choice to be fixed.
+
 Blades: When start time and end time are specified for a video, a visual range
 will be shown on the time slider to highlight the place in the video that will
 be played.

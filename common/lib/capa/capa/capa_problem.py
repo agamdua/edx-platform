@@ -17,6 +17,7 @@ from datetime import datetime
 import logging
 import os.path
 import re
+from random import Random
 
 from lxml import etree
 from xml.sax.saxutils import unescape
@@ -381,10 +382,52 @@ class LoncapaProblem(object):
             answer_ids.append(results.keys())
         return answer_ids
 
+    def shuffle_choices(self, choices):
+        """
+        Returns a list of choice nodes with the shuffling done.
+        Uses the self.seed for the randomness of the shuffle.
+        Choices with 'fixed'='true' are held back from the shuffle.
+        """
+        # Separate out a list of the stuff to be shuffled
+        # vs. the head/tail of choices to be held back from the shuffle.
+        # We're not supporting that an element "island" in the middle
+        # can be held back from the shuffle, only at the head and tail ends.
+        # Slightly tricky implementation using a state machine
+        head = []
+        middle = []  # only this one gets shuffled
+        tail = []
+        at_head = True
+        for choice in choices:
+            if at_head and choice.get('fixed') == 'true':
+                head.append(choice)
+                continue
+            at_head = False
+            if choice.get('fixed') == 'true':
+                tail.append(choice)
+            else:
+                middle.append(choice)
+        rng = Random(self.seed)  # make one vs. messing with the global one
+        rng.shuffle(middle)
+        return head + middle + tail
+    
+    def shuffle_tree(self, tree):
+        """
+        Shuffles the options in-place in the given tree.
+        """
+        for choicegroup in tree.xpath('//choicegroup[@shuffle="true"]'):
+            # Move elements from tree to list for shuffling, then put them back.
+            ordering = list(choicegroup.getchildren())
+            for choice in ordering:
+                choicegroup.remove(choice)
+            ordering = self.shuffle_choices(ordering)
+            for choice in ordering:
+                choicegroup.append(choice)
+
     def get_html(self):
         '''
         Main method called externally to get the HTML to be rendered for this capa Problem.
         '''
+        self.shuffle_tree(self.tree)
         html = contextualize_text(etree.tostring(self._extract_html(self.tree)), self.context)
         return html
 
