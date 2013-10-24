@@ -119,18 +119,32 @@
         initialize();
         spyOn($.fn, 'slider').andCallThrough();
         spyOn(videoPlayer, 'onSlideSeek').andCallThrough();
-        videoProgressSlider.onSlide({}, {
-          value: 20
-        });
+
+        state.videoPlayer.play();
       });
 
       it('freeze the slider', function() {
-        expect(videoProgressSlider.frozen).toBeTruthy();
+        waits(1000);
+
+        runs(function () {
+          videoProgressSlider.onSlide(jQuery.Event('slide'), { value: 20 });
+
+          expect(videoProgressSlider.frozen).toBeTruthy();
+        });
       });
 
       it('trigger seek event', function() {
-        expect(videoPlayer.onSlideSeek).toHaveBeenCalled();
-        expect(videoPlayer.currentTime).toEqual(20);
+        waits(1000);
+
+        runs(function () {
+          videoProgressSlider.onSlide(jQuery.Event('slide'), { value: 20 });
+
+          expect(videoPlayer.onSlideSeek).toHaveBeenCalled();
+
+          waitsFor(function () {
+            return videoPlayer.currentTime === 20
+          }, 'currentTime got updated', 1000);
+        });
       });
     });
 
@@ -159,9 +173,7 @@
 
         initialize();
         spyOn(videoPlayer, 'onSlideSeek').andCallThrough();
-        videoProgressSlider.onStop({}, {
-          value: 20
-        });
+        videoPlayer.play();
       });
 
       afterEach(function () {
@@ -172,19 +184,45 @@
       });
 
       it('freeze the slider', function() {
-        expect(videoProgressSlider.frozen).toBeTruthy();
+        waits(1000);
+
+        runs(function () {
+          videoProgressSlider.onStop(jQuery.Event('stop'), {
+            value: 20
+          });
+
+          expect(videoProgressSlider.frozen).toBeTruthy();
+        });
       });
 
       it('trigger seek event', function() {
-        expect(videoPlayer.onSlideSeek).toHaveBeenCalled();
-        expect(videoPlayer.currentTime).toEqual(20);
+        waits(1000);
+
+        runs(function () {
+          videoProgressSlider.onStop(jQuery.Event('stop'), {
+            value: 20
+          });
+
+          expect(videoPlayer.onSlideSeek).toHaveBeenCalled();
+
+          waitsFor(function () {
+            return videoPlayer.currentTime === 20
+          }, 'currentTime got updated', 1000);
+        });
       });
 
-      // Disabled 10/9/13 after failing in master
-      xit('set timeout to unfreeze the slider', function() {
-        expect(window.setTimeout).toHaveBeenCalledWith(jasmine.any(Function), 200);
-        window.setTimeout.mostRecentCall.args[0]();
-        expect(videoProgressSlider.frozen).toBeFalsy();
+      it('set timeout to unfreeze the slider', function() {
+        waits(1000);
+
+        runs(function () {
+          videoProgressSlider.onStop(jQuery.Event('stop'), {
+            value: 20
+          });
+
+          expect(window.setTimeout).toHaveBeenCalledWith(jasmine.any(Function), 200);
+          window.setTimeout.mostRecentCall.args[0]();
+          expect(videoProgressSlider.frozen).toBeFalsy();
+        });
       });
     });
   });

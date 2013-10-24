@@ -162,33 +162,21 @@
             });
 
             describe('[canplay]', function () {
-                beforeEach(function () {
+                it(
+                    'player state was changed, start/end was defined, ' +
+                    'onReady called', function ()
+                {
                     waitsFor(function () {
                         return player.getPlayerState() !== STATUS.UNSTARTED;
                     }, 'Video cannot be played', WAIT_TIMEOUT);
-                });
 
-                it('player state was changed', function () {
                     runs(function () {
                         expect(player.getPlayerState()).toBe(STATUS.PAUSED);
-                    });
-                });
-
-                it('end property was defined', function () {
-                    runs(function () {
                         expect(player.end).not.toBeNull();
-                    });
-                });
-
-                it('start position was defined', function () {
-                    runs(function () {
-                        expect(player.video.currentTime).toBe(player.start);
-                    });
-                });
-
-                it('onReady callback was called', function () {
-                    runs(function () {
-                        expect(player.config.events.onReady).toHaveBeenCalled();
+                        expect(player.video.currentTime)
+                            .toBe(state.videoPlayer.start);
+                        expect(player.config.events.onReady)
+                            .toHaveBeenCalled();
                     });
                 });
             });

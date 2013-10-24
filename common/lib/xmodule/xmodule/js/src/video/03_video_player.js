@@ -282,6 +282,8 @@ function (HTML5Video, Resizer) {
             this.videoPlayer.updateInterval = setInterval(
                 this.videoPlayer.update, 200
             );
+
+            setTimeout(this.videoPlayer.update, 0);
         } else {
             this.videoPlayer.currentTime = params.time;
         }
