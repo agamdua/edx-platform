@@ -34,9 +34,6 @@ function () {
 
         Player.prototype.seekTo = function (value) {
             if ((typeof value === 'number') && (value <= this.video.duration) && (value >= 0)) {
-                this.start = 0;
-                this.end = this.video.duration;
-
                 this.video.currentTime = value;
             }
         };
@@ -190,10 +187,6 @@ function () {
                 return;
             }
 
-            // Determine the starting and ending time for the video.
-            this.start = config.playerVars.start;
-            this.end = config.playerVars.end;
-
             // Create HTML markup for the <video> element, populating it with sources from previous step.
             // Because of problems with creating video element via jquery
             // (http://bugs.jquery.com/ticket/9174) we create it using native JS.
@@ -239,14 +232,6 @@ function () {
 
                 _this.playerState = HTML5Video.PlayerState.PAUSED;
 
-                if (_this.start > _this.video.duration) {
-                    _this.start = 0;
-                }
-                if ((_this.end === null) || (_this.end > _this.video.duration)) {
-                    _this.end = _this.video.duration;
-                }
-                _this.video.currentTime = _this.start;
-
                 if ($.isFunction(_this.config.events.onReady)) {
                     _this.config.events.onReady(null);
                 }
@@ -268,19 +253,6 @@ function () {
             this.video.addEventListener('ended', function () {
                 _this.playerState = HTML5Video.PlayerState.ENDED;
                 _this.callStateChangeCallback();
-            }, false);
-
-            // Register the 'timeupdate' event. This is the place where we control when the video ends.
-            // If an ending time was specified, then after the video plays through to this spot, pauses, we
-            // must make sure to update the ending time to the end of the video. This way, the user can watch
-            // any parts of it afterwards.
-            this.video.addEventListener('timeupdate', function (data) {
-                if (_this.end < _this.video.currentTime) {
-                    // When we call video.pause(), a 'pause' event will be formed, and we will catch it
-                    // in another handler (see above).
-                    _this.video.pause();
-                    _this.end = _this.video.duration;
-                }
             }, false);
 
             // Place the <video> element on the page.

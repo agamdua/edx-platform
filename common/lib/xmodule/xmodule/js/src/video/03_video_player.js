@@ -71,6 +71,8 @@ function (HTML5Video, Resizer) {
 
         state.videoPlayer.currentTime = 0;
 
+        state.videoPlayer.initialSeekToStartTime = false;
+
         state.videoPlayer.playerVars = {
             controls: 0,
             wmode: 'transparent',
@@ -84,8 +86,8 @@ function (HTML5Video, Resizer) {
             state.videoPlayer.playerVars.html5 = 1;
         }
 
-        state.videoPlayer.playerVars.start = state.config.start;
-        state.videoPlayer.playerVars.end = state.config.end;
+        state.videoPlayer.start = state.config.start;
+        state.videoPlayer.end = state.config.end;
 
         // There is a bug which prevents YouTube API to correctly set the speed
         // to 1.0 from another speed in Firefox when in HTML5 mode. There is a
@@ -188,6 +190,11 @@ function (HTML5Video, Resizer) {
 
         if (isFinite(this.videoPlayer.currentTime)) {
             this.videoPlayer.updatePlayTime(this.videoPlayer.currentTime);
+
+            if (this.videoPlayer.end < this.videoPlayer.currentTime) {
+                this.videoPlayer.pause();
+                this.videoPlayer.end = this.videoPlayer.duration();
+            }
         }
     }
 
@@ -246,6 +253,16 @@ function (HTML5Video, Resizer) {
     // It is created on a onPlay event. Cleared on a onPause event.
     // Reinitialized on a onSeek event.
     function onSeek(params) {
+        var duration = this.videoPlayer.duration();
+
+        if (
+            (typeof params.time !== 'number') ||
+            (params.time > duration) ||
+            (params.time < 0)
+        ) {
+            return;
+        }
+
         this.videoPlayer.log(
             'seek_video',
             {
@@ -254,6 +271,9 @@ function (HTML5Video, Resizer) {
                 type: params.type
             }
         );
+
+        this.videoPlayer.start = 0;
+        this.videoPlayer.end = duration;
 
         this.videoPlayer.player.seekTo(params.time, true);
 
@@ -462,6 +482,18 @@ function (HTML5Video, Resizer) {
         var duration;
 
         duration = this.videoPlayer.duration();
+
+        if (!this.videoPlayer.initialSeekToStartTime) {
+            if (this.videoPlayer.start > duration) {
+                this.videoPlayer.start = 0;
+            }
+            if ((this.videoPlayer.end === null) || (this.videoPlayer.end > duration)) {
+                this.videoPlayer.end = duration;
+            }
+            this.videoPlayer.player.seekTo(this.videoPlayer.start, true);
+
+            this.videoPlayer.initialSeekToStartTime = true;
+        }
 
         this.trigger(
             'videoProgressSlider.updatePlayTime',
