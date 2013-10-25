@@ -656,7 +656,11 @@
                 });
 
                 it('scroll the caption', function () {
-                    expect($.fn.scrollTo).toHaveBeenCalled();
+                    waits(1000);
+
+                    runs(function () {
+                        expect($.fn.scrollTo).toHaveBeenCalled();
+                    });
                 });
             });
         });

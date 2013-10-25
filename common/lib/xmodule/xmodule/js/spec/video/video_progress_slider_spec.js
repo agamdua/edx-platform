@@ -159,16 +159,6 @@
             });
         });
 
-        describe('onChange', function() {
-            beforeEach(function() {
-                initialize();
-                spyOn($.fn, 'slider').andCallThrough();
-                videoProgressSlider.onChange({}, {
-                value: 20
-                });
-            });
-        });
-
         describe('onStop', function() {
             // We will store default window.setTimeout() function here.
             var oldSetTimeout = null;

@@ -380,19 +380,6 @@
                 });
             });
 
-            xit(
-                'when the player is playing: reset the update interval',
-                function ()
-            {
-                waits(1000);
-
-                runs(function () {
-                    videoProgressSlider.onSlide(
-                        jQuery.Event('slide'), { value: 60 }
-                    );
-                });
-            });
-
             it(
                 'when the player is not playing: set the current time',
                 function ()
