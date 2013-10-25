@@ -153,7 +153,10 @@
                     expect(videoPlayer.onSlideSeek).toHaveBeenCalled();
 
                     waitsFor(function () {
-                        return videoPlayer.currentTime === 20
+                        return (
+                            videoPlayer.currentTime >= 19.5 ||
+                            videoPlayer.currentTime <= 20.5
+                        );
                     }, 'currentTime got updated', 1000);
                 });
             });
